@@ -1,5 +1,5 @@
 import prototype.server.config as config
-import prototype.server.proto.blackbox_server_pb2 as pb2
+import proto.blackbox_server_pb2 as pb2
 import sqlite3
 
 

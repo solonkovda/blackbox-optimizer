@@ -24,7 +24,7 @@ py_binary(
     deps = [
         "//prototype/server/algorithms:random_search",
         "//prototype/server/algorithms:simulated_annealing",
-        "//prototype/server/proto:blackbox_server_py_pb2",
+        "//proto:blackbox_server_py_pb2",
         ":blackbox_evaluator",
         ":storage",
         ":config",
@@ -35,8 +35,8 @@ py_binary(
     name = "blackbox_server",
     srcs = ["blackbox_server.py"],
     deps = [
-        "//prototype/server/proto:blackbox_server_py_pb2_grpc",
-        "//prototype/server/proto:blackbox_server_py_pb2",
+        "//proto:blackbox_server_py_pb2_grpc",
+        "//proto:blackbox_server_py_pb2",
         ":blackbox_optimizer"
     ],
 )

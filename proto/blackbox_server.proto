@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "prototype/server/proto/blackbox_variable.proto";
+import "proto/blackbox_variable.proto";
 
 // Request to start evaluation of a new black-box problem.
 message NewTaskRequest {

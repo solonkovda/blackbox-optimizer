@@ -1,6 +1,6 @@
 import prototype.server.algorithms.random_search as random_search
 import prototype.server.algorithms.simulated_annealing as simulated_annealing
-import prototype.server.proto.blackbox_server_pb2 as pb2
+import proto.blackbox_server_pb2 as pb2
 import prototype.server.blackbox_evaluator as blackbox_evaluator
 import prototype.server.storage as storage
 import sys

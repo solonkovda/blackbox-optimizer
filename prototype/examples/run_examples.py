@@ -1,9 +1,9 @@
 import argparse
 import grpc
 import time
-import prototype.server.proto.blackbox_server_pb2 as server_pb2
-import prototype.server.proto.blackbox_variable_pb2 as variable_pb2
-import prototype.server.proto.blackbox_server_pb2_grpc as pb_grpc
+import proto.blackbox_server_pb2 as server_pb2
+import proto.blackbox_variable_pb2 as variable_pb2
+import proto.blackbox_server_pb2_grpc as pb_grpc
 
 
 def run_task(stub, task_name, binary_path, variable_names, variable_ranges, algorithm):
@@ -57,22 +57,22 @@ def run_task(stub, task_name, binary_path, variable_names, variable_ranges, algo
 
 
 def run_sin_1d(stub):
-    run_task(stub, 'sin_1d', 'examples/sin_1d.py', ['x'], [(-10.0, 10.0)], server_pb2.NewTaskRequest.Algorithm.RANDOM_SEARCH)
-    run_task(stub, 'sin_1d', 'examples/sin_1d.py', ['x'], [(-10.0, 10.0)], server_pb2.NewTaskRequest.Algorithm.SIMULATED_ANNEALING)
+    run_task(stub, 'sin_1d', 'prototype/examples/sin_1d.py', ['x'], [(-10.0, 10.0)], server_pb2.NewTaskRequest.Algorithm.RANDOM_SEARCH)
+    run_task(stub, 'sin_1d', 'prototype/examples/sin_1d.py', ['x'], [(-10.0, 10.0)], server_pb2.NewTaskRequest.Algorithm.SIMULATED_ANNEALING)
 
 
 def run_rosenbrock_2d(stub):
-    run_task(stub, 'rosenbrock_2d', 'examples/rosenbrock_2d.py', ['x', 'y'], [(-100.0, 100.0), (-100.0, 100.0)],
+    run_task(stub, 'rosenbrock_2d', 'prototype/examples/rosenbrock_2d.py', ['x', 'y'], [(-100.0, 100.0), (-100.0, 100.0)],
              server_pb2.NewTaskRequest.Algorithm.RANDOM_SEARCH)
-    run_task(stub, 'rosenbrock_2d', 'examples/rosenbrock_2d.py', ['x', 'y'], [(-10.0, 10.0), (-100.0, 100.0)],
+    run_task(stub, 'rosenbrock_2d', 'prototype/examples/rosenbrock_2d.py', ['x', 'y'], [(-10.0, 10.0), (-100.0, 100.0)],
              server_pb2.NewTaskRequest.Algorithm.SIMULATED_ANNEALING)
 
 
 def run_calculator(stub):
-    run_task(stub, 'calculator', 'examples/calculator.py',
+    run_task(stub, 'calculator', 'prototype/examples/calculator.py',
              ['operation', 'x', 'y'], [['plus', 'minus', 'mul'], (-10, 10), (-10, 10)],
              server_pb2.NewTaskRequest.Algorithm.RANDOM_SEARCH)
-    run_task(stub, 'calculator', 'examples/calculator.py',
+    run_task(stub, 'calculator', 'prototype/examples/calculator.py',
              ['operation', 'x', 'y'], [['plus', 'minus', 'mul'], (-10, 10), (-10, 10)],
              server_pb2.NewTaskRequest.Algorithm.SIMULATED_ANNEALING)
 

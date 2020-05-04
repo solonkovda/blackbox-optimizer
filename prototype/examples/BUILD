@@ -10,7 +10,7 @@ py_binary(
     srcs = ["run_examples.py"],
     data = [":examples"],
     deps = [
-        "//prototype/server/proto:blackbox_server_py_pb2_grpc",
-        "//prototype/server/proto:blackbox_server_py_pb2",
+        "//proto:blackbox_server_py_pb2_grpc",
+        "//proto:blackbox_server_py_pb2",
     ]
 )

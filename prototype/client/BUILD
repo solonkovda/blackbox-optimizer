@@ -4,7 +4,7 @@ py_binary(
     name = "blackbox_client",
     srcs = ["blackbox_client.py"],
     deps = [
-        "//prototype/server/proto:blackbox_server_py_pb2_grpc",
-        "//prototype/server/proto:blackbox_server_py_pb2",
+        "//proto:blackbox_server_py_pb2_grpc",
+        "//proto:blackbox_server_py_pb2",
     ],
 )

@@ -6,8 +6,8 @@ from concurrent import futures
 
 import prototype.server.config as config
 import prototype.server.storage as storage
-import prototype.server.proto.blackbox_server_pb2 as pb2
-import prototype.server.proto.blackbox_server_pb2_grpc as pb2_grpc
+import proto.blackbox_server_pb2 as pb2
+import proto.blackbox_server_pb2_grpc as pb2_grpc
 
 
 def _launch_optimizer(task_id, metadata, task_path):

@@ -1,9 +1,9 @@
 import argparse
 import grpc
 import time
-import prototype.server.proto.blackbox_server_pb2 as server_pb2
-import prototype.server.proto.blackbox_variable_pb2 as variable_pb2
-import prototype.server.proto.blackbox_server_pb2_grpc as pb_grpc
+import proto.blackbox_server_pb2 as server_pb2
+import proto.blackbox_variable_pb2 as variable_pb2
+import proto.blackbox_server_pb2_grpc as pb_grpc
 
 
 def parse_args():
