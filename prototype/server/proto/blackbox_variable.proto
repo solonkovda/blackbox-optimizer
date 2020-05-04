@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+
+// This file defines a black-box problem variable with its range of values
+// as well as a way to pass it into the binary.
+
+// An integer variable in [l, r] range.
+message IntegerVariable {
+    int64 l = 1;
+    int64 r = 2;
+}
+
+// A rational variable in [l, r] range.
+message ContiniousVariable {
+    double l = 1;
+    double r = 2;
+}
+
+// A categorical variable with string value.
+message CategoricalVariable {
+    repeated string categories = 1;
+}
+
+// Specifies inputting the variable via environment variables.
+message EnvironmentInput {
+    // Name of the environment variable
+    string env_name = 1;
+}
+
+// Specifies inputting the variable via command line arguments.
+message ArgumentInput {
+    // Specifies the flag name. If empty, variable will be put as a 
+    // positional argument.
+    string arg_name = 1;
+    // Specifies whether to use "--" or "-" before arg_name.
+    bool long_arg = 2;
+}
+
+// Specifies inputting the variable directly to the binary.
+message DirectInput {
+}
+
+message BlackboxVariable {
+    string name = 1;
+    oneof variable_type {
+        ContiniousVariable continious_variable = 2;
+        IntegerVariable integer_variable = 3;
+        CategoricalVariable categorical_variable = 4;
+    }
+    oneof input_type {
+        DirectInput direct_input = 5;
+        ArgumentInput argument_input = 6;
+        EnvironmentInput environment_input = 7;
+    }
+}
