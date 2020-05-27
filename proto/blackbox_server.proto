@@ -1,24 +1,16 @@
 syntax = "proto3";
 
-import "proto/blackbox_variable.proto";
+import "proto/job.proto";
+
 
 // Request to start evaluation of a new black-box problem.
 message NewTaskRequest {
-    enum Algorithm {
-        RANDOM_SEARCH = 0;
-        SIMULATED_ANNEALING = 1;
-    }
-    message Metadata {
-        repeated BlackboxVariable task_variables = 1;
-        Algorithm algorithm = 2;
-    }
-
     message Body {
         bytes chunk = 1;
     }
 
     oneof stream_oneoff {
-        Metadata metadata = 1;
+        Job job = 1;
         Body body = 2;
     }
 }
@@ -36,25 +28,7 @@ message GetTaskResultRequest {
 
 // Returns the value of the function as well as variable values to achieve it.
 message GetTaskResultResponse {
-    message VariableValue {
-        message IntegerVariableValue {
-            int64 value = 1;
-        }
-        message ContiniousVariableValue {
-            double value = 1;
-        }
-        message CategoricalVariableValue {
-            string value = 1;
-        }
-        string name = 1;
-        oneof variable_value {
-            IntegerVariableValue integer_value = 2;
-            ContiniousVariableValue continious_value = 3;
-            CategoricalVariableValue categorical_value = 4;
-        }
-    }
-    double result = 1;
-    repeated VariableValue variable_values = 2;
+    CompletedJob job = 1;
 }
 
 service Blackbox {

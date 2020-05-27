@@ -4,7 +4,7 @@ import math
 
 _START_TEMP = 10
 _MAX_FAILED_STEPS = 100
-_CONTINIOUS_RANGE = 10
+_CONTINUOUS_RANGE = 10
 
 
 def _make_annealing_step(e, new_e, temp):
@@ -18,11 +18,11 @@ def _make_annealing_step(e, new_e, temp):
 class SimulatedAnnealingBlackboxSolver(base.BlackboxSolver):
     def _get_random_neighbour(self, variables):
         new_variables = []
-        for i, variable in enumerate(self.metadata.task_variables):
-            if variable.HasField('continious_variable'):
-                cont_var = variable.continious_variable
-                l = max(cont_var.l, variables[i] - _CONTINIOUS_RANGE)
-                r = min(cont_var.r, variables[i] + _CONTINIOUS_RANGE)
+        for i, variable in enumerate(self.optimization_job.task_variables):
+            if variable.HasField('continuous_variable'):
+                cont_var = variable.continuous_variable
+                l = max(cont_var.l, variables[i] - _CONTINUOUS_RANGE)
+                r = min(cont_var.r, variables[i] + _CONTINUOUS_RANGE)
                 value = random.uniform(l, r)
             elif variable.HasField('integer_variable'):
                 int_var = variable.integer_variable
@@ -37,12 +37,12 @@ class SimulatedAnnealingBlackboxSolver(base.BlackboxSolver):
 
     def solve(self):
         variables = self._generate_initial_values()
-        current_value = self.evaluator.evaluate(self.metadata.task_variables, variables)
+        current_value = self.evaluator.evaluate(self.optimization_job.task_variables, variables)
         failed_steps = 0
         steps_amount = 1
         while failed_steps < _MAX_FAILED_STEPS:
             new_variables = self._get_random_neighbour(variables)
-            new_value = self.evaluator.evaluate(self.metadata.task_variables, new_variables)
+            new_value = self.evaluator.evaluate(self.optimization_job.task_variables, new_variables)
             if _make_annealing_step(current_value, new_value, _START_TEMP / steps_amount**2):
                 if new_value > current_value:
                     failed_steps = 0

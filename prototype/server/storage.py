@@ -1,5 +1,5 @@
 import prototype.server.config as config
-import proto.blackbox_server_pb2 as pb2
+import proto.job_pb2 as pb2
 import sqlite3
 
 
@@ -50,7 +50,7 @@ class TaskStorageSqlite(TaskStorage):
         row = c.fetchone()
         if row is None:
             raise KeyError('task_id not found')
-        result = pb2.GetTaskResultResponse()
+        result = pb2.CompletedJob()
         result.ParseFromString(row[1])
         return result
 

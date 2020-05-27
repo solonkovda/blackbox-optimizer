@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+import "proto/blackbox_variable.proto";
+
+enum Algorithm {
+    RANDOM_SEARCH = 0;
+    SIMULATED_ANNEALING = 1;
+    NELDER_MEAD = 2;
+    OPENTUNER = 3;
+}
+
+message EvaluationJob {
+  string evaluation_job_id = 1;
+  repeated BlackboxVariable variables = 2;
+  repeated BlackboxVariableMetadata variables_metadata = 3;
+}
+
+message OptimizationJob {
+  repeated BlackboxVariableMetadata task_variables = 1;
+  Algorithm algorithm = 2;
+}
+
+message Job {
+  string job_id = 1;
+  oneof job_type {
+    EvaluationJob evaluation_job = 3;
+    OptimizationJob optimization_job = 4;
+  }
+}
+
+message CompletedEvaluationJob {
+  double result = 1;
+}
+
+message CompletedOptimizationJob {
+  double result = 1;
+  repeated BlackboxVariable variables = 2;
+}
+
+message CompletedJob {
+  string job_id = 1;
+  string task_id = 2;
+  oneof job_type {
+    CompletedEvaluationJob evaluation_job = 3;
+    CompletedOptimizationJob optimization_job = 4;
+  }
+}

@@ -12,5 +12,6 @@ py_binary(
     deps = [
         "//proto:blackbox_server_py_pb2_grpc",
         "//proto:blackbox_server_py_pb2",
+        "//proto:job_py_pb2",
     ]
 )

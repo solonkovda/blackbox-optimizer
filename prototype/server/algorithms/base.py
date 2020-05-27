@@ -1,15 +1,15 @@
 import random
 
 class BlackboxSolver(object):
-    def __init__(self, evaluator, variables_metadata):
+    def __init__(self, evaluator, optimization_job):
         self.evaluator = evaluator
-        self.metadata = variables_metadata
+        self.optimization_job = optimization_job
 
     def _generate_initial_values(self):
         variables = []
-        for variable in self.metadata.task_variables:
-            if variable.HasField('continious_variable'):
-                cont_var = variable.continious_variable
+        for variable in self.optimization_job.task_variables:
+            if variable.HasField('continuous_variable'):
+                cont_var = variable.continuous_variable
                 value = random.uniform(cont_var.l, cont_var.r)
             elif variable.HasField('integer_variable'):
                 int_var = variable.integer_variable

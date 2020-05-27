@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+import "proto/job.proto";
+
+message HeartbeatRequest {
+  string client_id = 1;
+}
+
+message HeartbeatResponse {
+}
+
+message GetJobRequest {
+  string client_id = 1;
+}
+
+message GetJobResponse {
+  Job job = 1;
+}
+
+message NewJobRequest {
+  string client_id = 1;
+  Job job = 2;
+}
+
+message NewJobResponse {
+  string job_id = 1;
+}
+
+message GetJobResultRequest {
+  string job_id = 1;
+}
+
+message GetJobResultResponse {
+  CompletedJob completed_job = 1;
+}
+
+message CompleteJobRequest {
+  string client_id = 1;
+  CompletedJob completed_job = 2;
+}
+
+message CompleteJobResponse {
+}
+
+message GetJobDataRequest {
+  string job_id = 1;
+  string client_id = 2;
+}
+
+message GetJobDataResponseChunk {
+  bytes chunk = 1;
+}
+
+service JobsHandler {
+    rpc Heartbeat (HeartbeatRequest) returns (HeartbeatResponse) {}
+    rpc GetJob (GetJobRequest) returns (GetJobResponse) {}
+    rpc NewJob (NewJobRequest) returns (NewJobResponse) {}
+    rpc GetJobResult (GetJobResultRequest) returns (GetJobResultResponse) {}
+    rpc CompleteJob (CompleteJobRequest) returns (CompleteJobResponse) {}
+    rpc GetJobData (GetJobDataRequest) returns (stream GetJobDataResponseChunk) {}
+}

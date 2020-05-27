@@ -16,17 +16,31 @@ py_proto_library(
 )
 
 proto_library(
-    name = "blackbox_server_proto",
+    name = "job_proto",
     srcs = [
-        "blackbox_server.proto",
+        "job.proto",
     ],
     deps = [":blackbox_variable_proto"]
 )
 
 py_proto_library(
+    name = "job_py_pb2",
+    srcs = ["job.proto"],
+    deps = [":blackbox_variable_py_pb2"]
+)
+
+proto_library(
+    name = "blackbox_server_proto",
+    srcs = [
+        "blackbox_server.proto",
+    ],
+    deps = [":job_proto"]
+)
+
+py_proto_library(
     name = "blackbox_server_py_pb2",
     srcs = ["blackbox_server.proto"],
-    deps = [":blackbox_variable_py_pb2"]
+    deps = [":job_py_pb2"]
 )
 
 py_grpc_library(
@@ -35,4 +49,30 @@ py_grpc_library(
     deps = [
         ":blackbox_server_py_pb2",
     ],
+)
+
+proto_library(
+    name = "jobs_handler_proto",
+    srcs = [
+        "jobs_handler.proto",
+    ],
+    deps = [
+        ":job_proto",
+    ],
+)
+
+py_proto_library(
+    name = "jobs_handler_py_pb2",
+    srcs = ["jobs_handler.proto"],
+    deps = [
+        ":job_py_pb2",
+    ],
+)
+
+py_grpc_library(
+    name = "jobs_handler_py_pb2_grpc",
+    srcs = [":jobs_handler_proto"],
+    deps = [
+        ":jobs_handler_py_pb2",
+    ]
 )

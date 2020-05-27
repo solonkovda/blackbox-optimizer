@@ -11,7 +11,7 @@ message IntegerVariable {
 }
 
 // A rational variable in [l, r] range.
-message ContiniousVariable {
+message ContinuousVariable {
     double l = 1;
     double r = 2;
 }
@@ -40,10 +40,10 @@ message ArgumentInput {
 message DirectInput {
 }
 
-message BlackboxVariable {
+message BlackboxVariableMetadata {
     string name = 1;
     oneof variable_type {
-        ContiniousVariable continious_variable = 2;
+        ContinuousVariable continuous_variable = 2;
         IntegerVariable integer_variable = 3;
         CategoricalVariable categorical_variable = 4;
     }
@@ -51,5 +51,23 @@ message BlackboxVariable {
         DirectInput direct_input = 5;
         ArgumentInput argument_input = 6;
         EnvironmentInput environment_input = 7;
+    }
+}
+
+message BlackboxVariable {
+    message ContinuousValue {
+        double value = 1;
+    }
+    message IntegerValue {
+        int64 value = 1;
+    }
+    message CategoricalValue {
+        string value = 1;
+    }
+    string name = 1;
+    oneof value_type {
+        ContinuousValue continuous_value = 2;
+        IntegerValue integer_value = 3;
+        CategoricalValue categorical_value = 4;
     }
 }

@@ -10,20 +10,20 @@ import proto.blackbox_server_pb2 as pb2
 import proto.blackbox_server_pb2_grpc as pb2_grpc
 
 
-def _launch_optimizer(task_id, metadata, task_path):
+def _launch_optimizer(task_id, optimization_job, task_path):
     p = subprocess.Popen(
         ['prototype/server/blackbox_optimizer', task_id, task_path],
         close_fds=True,
         stdin=subprocess.PIPE,
     )
-    p.stdin.write(metadata.SerializeToString())
+    p.stdin.write(optimization_job.SerializeToString())
     p.stdin.flush()
     p.stdin.close()
 
 
 class BlackboxServer(pb2_grpc.BlackboxServicer):
     def NewTask(self, request_iter, context):
-        header = request_iter.next().metadata
+        optimization_job = request_iter.next().job.optimization_job
 
         task_id = str(uuid.uuid4())
         file_path = os.path.join(config.BINARIES_FOLDER, task_id)
@@ -34,7 +34,7 @@ class BlackboxServer(pb2_grpc.BlackboxServicer):
         st = os.stat(file_path)
         os.chmod(file_path, st.st_mode | 0o111)
 
-        _launch_optimizer(task_id, header, file_path)
+        _launch_optimizer(task_id, optimization_job, file_path)
         
         response = pb2.NewTaskResponse()
         response.task_id = task_id
@@ -43,8 +43,10 @@ class BlackboxServer(pb2_grpc.BlackboxServicer):
     def GetTaskResult(self, request, context):
         stor = storage.TaskStorageSqlite()
         try:
-            result = stor.get_task_result(request.task_id)
-            return result
+            completed_job = stor.get_task_result(request.task_id)
+            response = pb2.GetTaskResultResponse()
+            response.job.CopyFrom(completed_job)
+            return response
         except KeyError:
             msg = 'No completed task found'
             context.set_details(msg)

@@ -44,7 +44,6 @@ class BlackboxBinaryFileEvaluator(BlackboxEvaluator):
             args,
             env=env_vars,
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
             input=direct_input,
             encoding='ascii',
             check=True
