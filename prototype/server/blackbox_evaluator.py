@@ -17,12 +17,12 @@ class BlackboxBinaryFileEvaluator(BlackboxEvaluator):
         # First pass parses positional arguments
         for i, variable_metadata in enumerate(variables_metadata):
             if variable_metadata.HasField('argument_input'):
-                if not variable_metadata.argument_input.HasField('arg_name'):
+                if not variable_metadata.argument_input.arg_name:
                     args.append(str(variables[i]))
         # Second pass parses flags
         for i, variable_metadata in enumerate(variables_metadata):
             if variable_metadata.HasField('argument_input'):
-                if variable_metadata.argument_input.HasField('arg_name'):
+                if variable_metadata.argument_input.arg_name:
                     arg_name = variable_metadata.argument_input.arg_name
                     if variable_metadata.argument_input.long_arg:
                         args.append('--' + arg_name)

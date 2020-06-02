@@ -10,8 +10,20 @@ class AlgorithmBase(object):
     def __init__(self, client_id, jobs_handler_stub):
         self.client_id = client_id
         self.jobs_handler_stub = jobs_handler_stub
+        self.start_time = time.time()
+        self.total_evaluations = 0
+
+    def _check_for_termination(self, job):
+        if job.optimization_job.job_parameters.time_limit != 0:
+            if self.start_time + job.optimization_job.job_parameters.time_limit < time.time():
+                return True
+        if job.optimization_job.job_parameters.max_evaluations != 0:
+            if self.total_evaluations > job.optimization_job.job_parameters.max_evaluations:
+                return True
+        return False
 
     def _start_evaluation_job(self, job, variables_dict):
+        self.total_evaluations += 1
         new_job = job_pb2.Job()
         new_job.evaluation_job.evaluation_job_id = job.job_id
         new_job.evaluation_job.variables_metadata.extend(job.optimization_job.task_variables)
@@ -65,7 +77,6 @@ class AlgorithmBase(object):
                 result = self._get_evaluation_job_result(job_id)
             completed_jobs.append((result, variables))
         return completed_jobs
-
 
     def solve(self, job):
         raise NotImplementedError()

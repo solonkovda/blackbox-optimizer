@@ -118,7 +118,7 @@ class OptimizationJobProcess(JobProcess):
         )
         p.stdin.write(self.job.SerializeToString())
         p.stdin.close()
-        return p
+        self.process = p
 
 
 def _request_and_start_job(stub, client_id):

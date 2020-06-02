@@ -1,16 +1,18 @@
 import os
 
-DATA_FOLDER = os.environ.get('DATA_FOLDER')
-if DATA_FOLDER is None:
-    raise AttributeError('DATA_FOLDER env variable is not set')
 
-SERVER_ADDRESS = os.environ.get('SERVER_ADDRESS')
-if SERVER_ADDRESS is None:
-    raise AttributeError('SERVER_ADDRESS env variable is not set')
+def _get_or_fail(name):
+    result = os.environ.get(name)
+    if result is None:
+        raise AttributeError('%s env variable is not set' % name)
+    return result
+
 
 HEARTBEAT_TIME = 60
 RESPONSE_DELAY = 5
 
-MAX_WORKERS = 4
+DATA_FOLDER = _get_or_fail('DATA_FOLDER')
+SERVER_ADDRESS = _get_or_fail('SERVER_ADDRESS')
+MAX_WORKERS = os.environ.get('MAX_WORKERS', 4)
+MAX_JOBS_PER_WORKER = os.environ.get('MAX_JOBS_PER_WORKER', 4)
 
-MAX_JOBS_PER_WORKER = 4

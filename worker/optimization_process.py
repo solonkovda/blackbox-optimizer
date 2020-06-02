@@ -10,6 +10,7 @@ import worker.config as config
 import grpc
 import sys
 
+
 def run_worker(job, client_id):
     channel = grpc.insecure_channel(config.SERVER_ADDRESS)
     stub = jobs_handler_pb2_grpc.JobsHandlerStub(channel)

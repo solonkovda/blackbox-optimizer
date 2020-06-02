@@ -8,7 +8,7 @@ from opentuner.api import TuningRunManager
 from opentuner.measurement.interface import DefaultMeasurementInterface
 from opentuner.resultsdb.models import Result
 from opentuner.search.manipulator import ConfigurationManipulator
-from opentuner.search.manipulator import FloatParameter, IntegerParameter
+from opentuner.search.manipulator import FloatParameter, IntegerParameter, EnumParameter
 
 _FAILED_JOBS_THRESHOLD = 100 * config.MAX_JOBS_PER_WORKER
 _THRESHOLD_EPS = 1e-5
@@ -28,6 +28,7 @@ class OpentunerAlgorithm(base.AlgorithmBase):
         parser = argparse.ArgumentParser(parents=opentuner.argparsers())
         args = parser.parse_args([])
         args.parallelism = 4
+        args.no_dups = True
         interface = DefaultMeasurementInterface(args=args,
                                                 manipulator=manipulator,
                                                 project_name=job.job_id)
@@ -35,7 +36,7 @@ class OpentunerAlgorithm(base.AlgorithmBase):
         jobs = []
         current_value = None
         failed_jobs = 0
-        while failed_jobs < _FAILED_JOBS_THRESHOLD:
+        while failed_jobs < _FAILED_JOBS_THRESHOLD and not self._check_for_termination(job):
             remaining_jobs = []
             for job_id, desired_result in jobs:
                 res = self._get_evaluation_job_result(job_id)

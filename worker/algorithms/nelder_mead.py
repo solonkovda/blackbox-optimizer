@@ -62,7 +62,7 @@ class NelderMead(base.AlgorithmBase):
         current_best = current_vertices[0]
 
         previous_iteration_values = None
-        while True:
+        while not self._check_for_termination(job):
             current_vertices.sort(key=lambda x: x[0])
             if current_vertices[0][0] < current_best[0]:
                 current_best = current_vertices[0]

@@ -25,5 +25,5 @@ py_library(
     deps = [
         ":base",
         requirement("opentuner"),
-    ]
+    ],
 )

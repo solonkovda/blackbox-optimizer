@@ -16,8 +16,13 @@ message EvaluationJob {
 }
 
 message OptimizationJob {
+  message JobParameters {
+    float time_limit = 1;
+    int64 max_evaluations = 2;
+  }
   repeated BlackboxVariableMetadata task_variables = 1;
   Algorithm algorithm = 2;
+  JobParameters job_parameters = 3;
 }
 
 message Job {

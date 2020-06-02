@@ -85,7 +85,7 @@ class RandomSearch(base.AlgorithmBase):
         total_fails = 0
         jobs = []
         current_delta = _get_initial_delta(job.optimization_job.task_variables)
-        while current_delta > _MINIMAL_DELTA:
+        while current_delta > _MINIMAL_DELTA and not self._check_for_termination(job):
             completed_jobs, jobs = self._parse_job_list(jobs)
             for result, variables in completed_jobs:
                 if result < cur_value - _EPS_FOR_RESULT_VALUE:
