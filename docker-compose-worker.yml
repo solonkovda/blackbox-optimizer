@@ -8,4 +8,4 @@ services:
     image: solonkovda/blackbox_optimization_worker:master
     environment:
       DATA_FOLDER: /worker/data_folder
-      SERVER_ADDRESS:
+      SERVER_ADDRESS: ${SERVER_ADDRESS:?no server address specified}
