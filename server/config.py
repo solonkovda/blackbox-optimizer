@@ -15,4 +15,5 @@ DATABASE_USER = _get_or_fail('DATABASE_USER')
 DATABASE_PASSWORD = _get_or_fail('DATABASE_PASSWORD')
 DATABASE_HOST = os.environ.get('DATABASE_HOST', 'localhost')
 
-GARBAGE_WAIT_TIME = 60 * 1
+GARBAGE_WAIT_TIME = 5  # 1 minute
+CLIENT_ACTIVE_TIME = 20  # 5 minutes.

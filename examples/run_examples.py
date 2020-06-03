@@ -13,11 +13,22 @@ _ALGORITHM_CHOICES = [
     'nelder_mead',
     'opentuner'
 ]
+_EXAMPLE_CHOICES = [
+    'finding_discrete_point.py',
+    'rock_paper_scissors.py',
+    'rosenbrock_2d.py',
+    'simple_4_variable_knapsack.py',
+    'sin_1d.py',
+    'sin_1d_argument.py',
+    'sin_1d_environment.py'
+]
+
 
 class InputType(enum.Enum):
     DIRECT = 1
     ARGUMENT = 2
     ENV = 3
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--server-address',
@@ -35,6 +46,9 @@ parser.add_argument('--evaluation-limit',
                     help='Limit of permitted evaluations. 0 for unlimited',
                     type=int,
                     default=0)
+parser.add_argument('--run-only',
+                    help='Runs only the given example, instead of running all of them',
+                    choices=_EXAMPLE_CHOICES)
 
 
 def _wait_for_task(stub, task_id):
@@ -61,7 +75,7 @@ def request_generator(header, binary_path):
         yield r
 
 
-def _run_example(stub, path, algorithm, job_parameters, variables):
+def _run_example(stub, path, algorithm, job_parameters, variables, constraints):
     print('Running %s' % path)
     print('Variables: %s' % str(variables))
     header = blackbox_server_pb2.NewTaskRequest()
@@ -88,6 +102,18 @@ def _run_example(stub, path, algorithm, job_parameters, variables):
         else:
             var.environment_input.env_name = input_type[1]
         header.job.optimization_job.task_variables.append(var)
+
+    for (vars, constant_term) in constraints:
+        job_constraint = job_pb2.OptimizationJob.JobConstraint()
+        job_constraint.constant_term = constant_term
+        for name, coefficient in vars:
+            variable_constraint = job_pb2.OptimizationJob.JobConstraint.VariableConstraint()
+            variable_constraint.name = name
+            variable_constraint.coefficient = coefficient
+            job_constraint.variable_constraints.append(variable_constraint)
+        header.job.optimization_job.job_constraints.append(job_constraint)
+
+
     start_time = time.time()
     task_id = stub.NewTask(request_generator(header, path)).task_id
     response = _wait_for_task(stub, task_id)
@@ -123,59 +149,67 @@ def main():
         algorithm = job_pb2.Algorithm.NELDER_MEAD
     else:
         algorithm = job_pb2.Algorithm.OPENTUNER
-    _run_example(
-        stub,
-        'examples/files/sin_1d.py',
-        algorithm,
-        job_parameters,
-        {
-            'x': (
-                (-7.0, 7.0),
-                (InputType.DIRECT,)
-            ),
-        }
-    )
-    _run_example(
-        stub,
-        'examples/files/sin_1d_argument.py',
-        algorithm,
-        job_parameters,
-        {
-            'x': (
-                (-7.0, 7.0),
-                (InputType.ARGUMENT, 'x', True)
-            ),
-        }
-    )
-    _run_example(
-        stub,
-        'examples/files/sin_1d_environment.py',
-        algorithm,
-        job_parameters,
-        {
-            'x': (
-                (-7.0, 7.0),
-                (InputType.ENV, 'X')
-            ),
-        }
-    )
-    _run_example(
-        stub,
-        'examples/files/rosenbrock_2d.py',
-        algorithm,
-        job_parameters,
-        {
-            'x': (
-                (-5.0, 5.0),
-                (InputType.DIRECT,)
-            ),
-            'y': (
-                (-5.0, 5.0),
-                (InputType.DIRECT, )
-            ),
-        }
-    )
-    if algorithm != job_pb2.Algorithm.NELDER_MEAD and algorithm != job_pb2.Algorithm.OPENTUNER:
+    if not args.run_only or args.run_only == 'sin_1d.py':
+        _run_example(
+            stub,
+            'examples/files/sin_1d.py',
+            algorithm,
+            job_parameters,
+            {
+                'x': (
+                    (-7.0, 7.0),
+                    (InputType.DIRECT,)
+                ),
+            },
+            []
+        )
+    if not args.run_only or args.run_only == 'sin_1d_argument.py':
+        _run_example(
+            stub,
+            'examples/files/sin_1d_argument.py',
+            algorithm,
+            job_parameters,
+            {
+                'x': (
+                    (-7.0, 7.0),
+                    (InputType.ARGUMENT, 'x', True)
+                ),
+            },
+            []
+        )
+    if not args.run_only or args.run_only == 'sin_1d_environment.py':
+        _run_example(
+            stub,
+            'examples/files/sin_1d_environment.py',
+            algorithm,
+            job_parameters,
+            {
+                'x': (
+                    (-7.0, 7.0),
+                    (InputType.ENV, 'X')
+                ),
+            },
+            []
+        )
+    if not args.run_only or args.run_only == 'rosenbrock_2d.py':
+        _run_example(
+            stub,
+            'examples/files/rosenbrock_2d.py',
+            algorithm,
+            job_parameters,
+            {
+                'x': (
+                    (-5.0, 5.0),
+                    (InputType.DIRECT,)
+                ),
+                'y': (
+                    (-5.0, 5.0),
+                    (InputType.DIRECT, )
+                ),
+            },
+            []
+        )
+    if (not args.run_only or args.run_only == 'rock_paper_scissors.py') and algorithm != job_pb2.Algorithm.NELDER_MEAD and algorithm != job_pb2.Algorithm.OPENTUNER:
         _run_example(
             stub,
             'examples/files/rock_paper_scissors.py',
@@ -190,9 +224,10 @@ def main():
                     ['rock', 'paper', 'scissors'],
                     (InputType.DIRECT,)
                 ),
-            }
+            },
+            []
         )
-    if algorithm != job_pb2.Algorithm.NELDER_MEAD:
+    if (not args.run_only or args.run_only == 'finding_discrete_point.py') and algorithm != job_pb2.Algorithm.NELDER_MEAD:
         _run_example(
             stub,
             'examples/files/finding_discrete_point.py',
@@ -207,7 +242,44 @@ def main():
                     (0, 100),
                     (InputType.DIRECT,)
                 ),
-            }
+            },
+            []
+        )
+    if (not args.run_only or args.run_only == 'simple_4_variable_knapsack.py') and algorithm != job_pb2.Algorithm.NELDER_MEAD:
+        _run_example(
+            stub,
+            'examples/files/simple_4_variable_knapsack.py',
+            algorithm,
+            job_parameters,
+            {
+                'x1': (
+                    (0, 10),
+                    (InputType.DIRECT,)
+                ),
+                'x2': (
+                    (0, 10),
+                    (InputType.DIRECT,)
+                ),
+                'x3': (
+                    (0, 10),
+                    (InputType.DIRECT,)
+                ),
+                'x4': (
+                    (0, 10),
+                    (InputType.DIRECT,)
+                ),
+            },
+            [
+                (
+                    [
+                        ('x1', 60),
+                        ('x2', 1),
+                        ('x3', 30),
+                        ('x4', 35),
+                    ],
+                    99.5,
+                )
+            ],
         )
 
 

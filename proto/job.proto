@@ -20,9 +20,18 @@ message OptimizationJob {
     float time_limit = 1;
     int64 max_evaluations = 2;
   }
+  message JobConstraint {
+    message VariableConstraint {
+      string name = 1;
+      float coefficient = 2;
+    }
+    repeated VariableConstraint variable_constraints = 1;
+    float constant_term = 2;
+  }
   repeated BlackboxVariableMetadata task_variables = 1;
   Algorithm algorithm = 2;
   JobParameters job_parameters = 3;
+  repeated JobConstraint job_constraints = 4;
 }
 
 message Job {

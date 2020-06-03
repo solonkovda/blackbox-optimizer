@@ -17,7 +17,9 @@ class JobsHandlerServer(pb2_grpc.JobsHandlerServicer):
     
     def Heartbeat(self, request, context):
         self.storage_instance.update_client_heartbeat_time(request.client_id)
-        return pb2.HeartbeatResponse()
+        response = pb2.HeartbeatResponse()
+        response.active_workers = self.storage_instance.get_count_of_active_clients()
+        return response
 
     def GetJob(self, request, context):
         job = self.storage_instance.get_job(request.client_id)

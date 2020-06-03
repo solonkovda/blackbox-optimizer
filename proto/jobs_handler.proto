@@ -7,6 +7,7 @@ message HeartbeatRequest {
 }
 
 message HeartbeatResponse {
+  int64 active_workers = 1;
 }
 
 message GetJobRequest {

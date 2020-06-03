@@ -1,17 +1,27 @@
 import proto.blackbox_variable_pb2 as blackbox_variable_pb2
 import proto.job_pb2 as job_pb2
 import proto.jobs_handler_pb2 as jobs_handler_pb2
+import worker.config as config
 
 import grpc
+import math
 import time
 
 
+def _check_constraint(job_constraint, variables_dict):
+    total = 0
+    for var_constraint in job_constraint.variable_constraints:
+        total += variables_dict[var_constraint.name] * var_constraint.coefficient
+    return total < job_constraint.constant_term
+
+
 class AlgorithmBase(object):
-    def __init__(self, client_id, jobs_handler_stub):
+    def __init__(self, client_id, jobs_handler_stub, active_workers):
         self.client_id = client_id
         self.jobs_handler_stub = jobs_handler_stub
         self.start_time = time.time()
         self.total_evaluations = 0
+        self.jobs_limit = active_workers * config.MAX_JOBS_PER_ACTIVE_WORKER
 
     def _check_for_termination(self, job):
         if job.optimization_job.job_parameters.time_limit != 0:
@@ -23,6 +33,10 @@ class AlgorithmBase(object):
         return False
 
     def _start_evaluation_job(self, job, variables_dict):
+        for job_constraint in job.optimization_job.job_constraints:
+            if not _check_constraint(job_constraint, variables_dict):
+                return None
+
         self.total_evaluations += 1
         new_job = job_pb2.Job()
         new_job.evaluation_job.evaluation_job_id = job.job_id
@@ -46,6 +60,9 @@ class AlgorithmBase(object):
         return response.job_id
 
     def _get_evaluation_job_result(self, job_id):
+        if job_id is None:
+            # Job failed to met the task constraints.
+            return math.inf
         request = jobs_handler_pb2.GetJobResultRequest()
         request.job_id = job_id
         try:

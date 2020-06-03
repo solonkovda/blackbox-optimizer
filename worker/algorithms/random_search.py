@@ -2,11 +2,12 @@ import worker.algorithms.base as base
 import worker.config as config
 
 import random
+import math
 import time
 
 _START_DELTA = 1000
 _MINIMAL_DELTA = 0.001
-_ALLOWED_FAILS = config.MAX_JOBS_PER_WORKER * 2
+_ALLOWED_FAILS_COEFF = 2
 _EPS_FOR_RESULT_VALUE = 0.001
 _DELTA_REDUCTION_COEFF = 0.1
 
@@ -64,7 +65,7 @@ def _random_search_step(variables, step_size, variables_metadata):
 class RandomSearch(base.AlgorithmBase):
     def _generate_initial_values(self, job, variables_metadata):
         jobs = []
-        for _ in range(config.MAX_JOBS_PER_WORKER):
+        for _ in range(self.jobs_limit):
             variables = _generate_random_values(variables_metadata)
             job_id = self._start_evaluation_job(job, variables)
             jobs.append((job_id, variables))
@@ -81,7 +82,10 @@ class RandomSearch(base.AlgorithmBase):
         return best_job
 
     def solve(self, job):
+        allowed_fails = self.jobs_limit * _ALLOWED_FAILS_COEFF
         cur_value, cur_variables = self._generate_initial_values(job, job.optimization_job.task_variables)
+        while cur_value == math.inf:
+            cur_value, cur_variables = self._generate_initial_values(job, job.optimization_job.task_variables)
         total_fails = 0
         jobs = []
         current_delta = _get_initial_delta(job.optimization_job.task_variables)
@@ -93,10 +97,10 @@ class RandomSearch(base.AlgorithmBase):
                     total_fails = 0
                 else:
                     total_fails += 1
-            if total_fails > _ALLOWED_FAILS:
+            if total_fails > allowed_fails:
                 total_fails = 0
                 current_delta *= _DELTA_REDUCTION_COEFF
-            while len(jobs) < config.MAX_JOBS_PER_WORKER:
+            while len(jobs) < self.jobs_limit:
                 variables = _random_search_step(cur_variables, current_delta, job.optimization_job.task_variables)
                 job_id = self._start_evaluation_job(job, variables)
                 jobs.append((job_id, variables))

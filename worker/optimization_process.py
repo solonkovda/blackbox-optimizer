@@ -11,16 +11,16 @@ import grpc
 import sys
 
 
-def run_worker(job, client_id):
+def run_worker(job, client_id, active_workers):
     channel = grpc.insecure_channel(config.SERVER_ADDRESS)
     stub = jobs_handler_pb2_grpc.JobsHandlerStub(channel)
     algorithm = job.optimization_job.algorithm
     if algorithm == job_pb2.Algorithm.RANDOM_SEARCH:
-        solver = random_search.RandomSearch(client_id, stub)
+        solver = random_search.RandomSearch(client_id, stub, active_workers)
     elif algorithm == job_pb2.Algorithm.NELDER_MEAD:
-        solver = nelder_mead.NelderMead(client_id, stub)
+        solver = nelder_mead.NelderMead(client_id, stub, active_workers)
     else:
-        solver = opentuner_algorithm.OpentunerAlgorithm(client_id, stub)
+        solver = opentuner_algorithm.OpentunerAlgorithm(client_id, stub, active_workers)
 
     result, variables_dict = solver.solve(job)
 
@@ -49,4 +49,4 @@ if __name__ == '__main__':
     data = sys.stdin.buffer.read()
     job = job_pb2.Job()
     job.ParseFromString(data)
-    run_worker(job, sys.argv[1])
+    run_worker(job, sys.argv[1], int(sys.argv[2]))

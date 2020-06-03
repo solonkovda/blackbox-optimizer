@@ -8,11 +8,11 @@ def _get_or_fail(name):
     return result
 
 
-HEARTBEAT_TIME = 60
+HEARTBEAT_TIME = 10
 RESPONSE_DELAY = 5
 
 DATA_FOLDER = _get_or_fail('DATA_FOLDER')
 SERVER_ADDRESS = _get_or_fail('SERVER_ADDRESS')
 MAX_WORKERS = os.environ.get('MAX_WORKERS', 4)
-MAX_JOBS_PER_WORKER = os.environ.get('MAX_JOBS_PER_WORKER', 4)
+MAX_JOBS_PER_ACTIVE_WORKER = os.environ.get('MAX_JOBS_PER_ACTIVE_WORKER', 2)
 

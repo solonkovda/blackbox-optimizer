@@ -27,6 +27,7 @@ class HeartbeatThread(threading.Thread):
         self.server_address = server_address
         self.client_id = client_id
         self.running = True
+        self.active_workers = 0
 
     def run(self):
         channel = grpc.insecure_channel(self.server_address)
@@ -34,7 +35,8 @@ class HeartbeatThread(threading.Thread):
         request = pb2.HeartbeatRequest()
         request.client_id = self.client_id
         while self.running:
-            stub.Heartbeat(request)
+            response = stub.Heartbeat(request)
+            self.active_workers = response.active_workers
             time.sleep(config.HEARTBEAT_TIME)
 
 
@@ -52,7 +54,7 @@ class JobProcess(object):
         else:
             return OptimizationJobProcess(stub, client_id, job)
 
-    def start(self):
+    def start(self, active_workers):
         raise NotImplementedError()
 
     def check_status(self):
@@ -98,7 +100,7 @@ class EvaluationJobProcess(JobProcess):
         super().__init__(stub, client_id, job)
         self.task_binary_path = self._download_task_data()
 
-    def start(self):
+    def start(self, active_workers):
         p = subprocess.Popen(
             ['worker/evaluator_process', client_id, self.task_binary_path],
             stdin=subprocess.PIPE,
@@ -110,9 +112,9 @@ class EvaluationJobProcess(JobProcess):
 
 
 class OptimizationJobProcess(JobProcess):
-    def start(self):
+    def start(self, active_workers):
         p = subprocess.Popen(
-            ['worker/optimization_process', self.client_id],
+            ['worker/optimization_process', self.client_id, str(active_workers)],
             stdin=subprocess.PIPE,
             close_fds=True
         )
@@ -121,7 +123,7 @@ class OptimizationJobProcess(JobProcess):
         self.process = p
 
 
-def _request_and_start_job(stub, client_id):
+def _request_and_start_job(stub, client_id, active_workers):
     request = pb2.GetJobRequest()
     request.client_id = client_id
     try:
@@ -133,7 +135,7 @@ def _request_and_start_job(stub, client_id):
         return None
     job = response.job
     job_process = JobProcess.create_job_process(stub, client_id, job)
-    job_process.start()
+    job_process.start(active_workers)
     return job_process
 
 
@@ -146,8 +148,12 @@ def worker_loop(client_id):
 
     workers = []
     while not _shutdown_graceful:
+        current_active_workers = heartbeat_thread.active_workers
+        if not current_active_workers:
+            time.sleep(config.RESPONSE_DELAY)
+            continue
         while len(workers) < config.MAX_WORKERS:
-            worker = _request_and_start_job(stub, client_id)
+            worker = _request_and_start_job(stub, client_id, current_active_workers)
             if worker is None:
                 break
             workers.append(worker)
@@ -158,7 +164,7 @@ def worker_loop(client_id):
                 remaining_workers.append(w)
             elif status_code != 0:
                 # Restarting worker
-                w.start()
+                w.start(current_active_workers)
                 remaining_workers.append(w)
         workers = remaining_workers
         time.sleep(config.RESPONSE_DELAY)

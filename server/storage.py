@@ -37,6 +37,11 @@ ON CONFLICT(client_id) DO UPDATE
 SET client_heartbeat_time=current_timestamp;
 '''
 
+_GET_COUNT_OF_ACTIVE_CLIENTS_SQL = r'''
+SELECT COUNT(*) FROM clients
+WHERE client_heartbeat_time >= current_timestamp - make_interval(secs := %s);
+'''
+
 _ASSIGN_JOB_TO_CLIENT_SQL = r'''
 UPDATE jobs
 SET assigned_to = %s
@@ -77,16 +82,17 @@ FROM clients
 WHERE
     clients.client_id=jobs.assigned_to AND
     jobs.job_result IS NULL AND
-    client_heartbeat_time < current_timestamp - INTERVAL '5 minutes'
+    client_heartbeat_time < current_timestamp - make_interval(secs := %s)
 '''
+
 
 class ServerStorage(object):
     def __init__(self):
         self.conn = psycopg2.connect(
-            user = config.DATABASE_USER,
-            password = config.DATABASE_PASSWORD,
-            host = config.DATABASE_HOST,
-            database = config.DATABASE_NAME
+            user=config.DATABASE_USER,
+            password=config.DATABASE_PASSWORD,
+            host=config.DATABASE_HOST,
+            database=config.DATABASE_NAME
         )
         self.conn.autocommit = True
 
@@ -96,10 +102,10 @@ class ServerStorage(object):
     @staticmethod
     def initialize_database():
         with psycopg2.connect(
-            user = config.DATABASE_USER,
-            password = config.DATABASE_PASSWORD,
-            host = config.DATABASE_HOST,
-            database = config.DATABASE_NAME
+            user=config.DATABASE_USER,
+            password=config.DATABASE_PASSWORD,
+            host=config.DATABASE_HOST,
+            database=config.DATABASE_NAME
         ) as conn:
             cur = conn.cursor()
             cur.execute(_INITIALIZE_DATABASE_SQL)
@@ -162,5 +168,10 @@ class ServerStorage(object):
 
     def reassign_lost_jobs(self):
         cur = self.conn.cursor()
-        cur.execute(_REASSIGN_LOST_JOBS_SQL)
+        cur.execute(_REASSIGN_LOST_JOBS_SQL, (config.CLIENT_ACTIVE_TIME,))
         return cur.rowcount
+
+    def get_count_of_active_clients(self):
+        cur = self.conn.cursor()
+        cur.execute(_GET_COUNT_OF_ACTIVE_CLIENTS_SQL, (config.CLIENT_ACTIVE_TIME,))
+        return cur.fetchone()[0]
