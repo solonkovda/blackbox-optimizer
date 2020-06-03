@@ -179,5 +179,5 @@ def worker_loop(client_id):
 
 if __name__ == '__main__':
     client_id = str(uuid.uuid4())
-    print('Worker started, id = %s' % client_id)
+    print('Worker started, id = %s' % client_id, flush=True)
     worker_loop(client_id)
