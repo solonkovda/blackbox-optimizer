@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  blackbox-worker:
+    network_mode: host
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    image: solonkovda/blackbox_optimization_worker:master
+    environment:
+      DATA_FOLDER: /worker/data_folder
+      SERVER_ADDRESS:

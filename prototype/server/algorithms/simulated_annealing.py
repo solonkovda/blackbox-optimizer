@@ -44,7 +44,7 @@ class SimulatedAnnealingBlackboxSolver(base.BlackboxSolver):
             new_variables = self._get_random_neighbour(variables)
             new_value = self.evaluator.evaluate(self.optimization_job.task_variables, new_variables)
             if _make_annealing_step(current_value, new_value, _START_TEMP / steps_amount**2):
-                if new_value > current_value:
+                if new_value < current_value:
                     failed_steps = 0
                 variables, current_value = new_variables, new_value
             else:

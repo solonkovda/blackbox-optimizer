@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_DB: blackbox_db
+      POSTGRES_USER: blackbox_user
+      # This is somewhat insecure, but the database is not exposed to the outside world.
+      POSTGRES_PASSWORD: blackbox_password
+  blackbox-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    image: solonkovda/blackbox_optimization_server:master
+    ports:
+    - "50051:50051"
+    environment:
+      DATA_FOLDER: /server/data_folder
+      DATABASE_HOST: postgres
+      DATABASE_NAME: blackbox_db
+      DATABASE_USER: blackbox_user
+      DATABASE_PASSWORD: blackbox_password
+    links:
+      - postgres

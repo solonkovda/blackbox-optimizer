@@ -1,0 +1,13 @@
+FROM python:3.7-buster
+WORKDIR /worker
+RUN wget -O /usr/local/bin/bazel "https://github.com/bazelbuild/bazel/releases/download/3.2.0/bazel-3.2.0-linux-x86_64"\
+&& chmod +x /usr/local/bin/bazel
+COPY BUILD /worker
+COPY WORKSPACE /worker
+COPY requirements.txt /worker
+COPY proto/ /worker/proto
+RUN bazel build //proto:all
+COPY worker/ /worker/worker
+RUN bazel build //worker:worker_client
+RUN mkdir /worker/data_folder
+CMD ["bazel", "run", "//worker:worker_client"]

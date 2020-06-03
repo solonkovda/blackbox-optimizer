@@ -32,7 +32,7 @@ class RandomSearchBlackboxSolver(base.BlackboxSolver):
         while failed_steps < _RANDOM_SEARCH_MAX_FAILED_STEPS:
             new_variables = self._random_search_step(variables)
             new_value = self.evaluator.evaluate(self.optimization_job.task_variables, new_variables)
-            if new_value > current_value:
+            if new_value < current_value:
                 variables, current_value = new_variables, new_value
                 failed_steps = 0
             else:
