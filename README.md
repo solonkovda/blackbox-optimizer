@@ -13,7 +13,7 @@
 git clone git@github.com:solonkovda/blackbox-optimizer.git
 cd blackbox-optimizer
 ```
-####Сервер
+#### Сервер
 Задание следующих переменных окружения перед запуском сервера позволяет конфигурировать его:
 * `GARBAGE_WAIT_TIME` - время (в секундах) между запусками сборки мусора
 * `CLIENT_ACTIVE_TIME` - время (в секундах) отсутствия сердцебиения от вычислительного узла после которого он признается
@@ -32,7 +32,7 @@ docker-compose -f docker-compose-server.yml down
 ```bash
 docker-compose -f docker-compose-server.yml logs
 ```
-####Вычислительный узел
+#### Вычислительный узел
 Для запуска необходимо задать переменную окружения `SERVER_ADDRESS`, указывающую на адрес сервера.
 Если запуск узла проходит с той же машины, что и сервер, то `localhost:50051` является рабочим адресом. Дополнительно, 
 вычислительный узел поддерживает следующие переменные окружения:
@@ -57,7 +57,7 @@ docker-compose -f docker-compose-worker.yml down
 ```bash
 docker-compose -f docker-compose-worker.yml logs
 ```
-##Запуск из исходного кода
+## Запуск из исходного кода
 Для запуска из исходного кода потребуется [Bazel](https://bazel.build/) и поднятая
 [PostgreSQL](https://www.postgresql.org/) база данных на сервере.
 ### Сервер
