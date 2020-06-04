@@ -2,7 +2,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:13
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: blackbox_db
       POSTGRES_USER: blackbox_user
@@ -13,6 +13,7 @@ services:
       context: .
       dockerfile: Dockerfile.server
     image: solonkovda/blackbox_optimization_server:master
+    restart: unless-stopped
     ports:
     - "50051:50051"
     environment:
@@ -21,5 +22,6 @@ services:
       DATABASE_NAME: blackbox_db
       DATABASE_USER: blackbox_user
       DATABASE_PASSWORD: blackbox_password
+      PYTHONUNBUFFERED: 1
     depends_on:
       - postgres

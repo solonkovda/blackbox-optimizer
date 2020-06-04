@@ -2,6 +2,7 @@ import proto.job_pb2 as job_pb2
 import server.config as config
 
 import os
+import time
 import psycopg2
 
 
@@ -85,15 +86,36 @@ WHERE
     client_heartbeat_time < current_timestamp - make_interval(secs := %s)
 '''
 
+_DATABASE_CONN_RETRIES = 5
+_DATABASE_CONN_RETRY_DELAY = 10
+
+
+def _open_database_connection_with_retry():
+    """Opens the connection to database with retries if unsuccessful.
+
+    This method is necessary, since docker can't guarantee that
+    blackbox server will be started after database finished initializing.
+    By retrying with time delay we give database time to finish initializing.
+    """
+    for _ in range(_DATABASE_CONN_RETRIES):
+        try:
+            conn = psycopg2.connect(
+                user=config.DATABASE_USER,
+                password=config.DATABASE_PASSWORD,
+                host=config.DATABASE_HOST,
+                database=config.DATABASE_NAME
+            )
+            return conn
+        except psycopg2.OperationError:
+            print('Unable to connect to database, retrying')
+            time.sleep(_DATABASE_CONN_RETRY_DELAY)
+    print('Unable to connect to database, terminating')
+    raise ConnectionRefusedError('Unable to connect to database')
+
 
 class ServerStorage(object):
     def __init__(self):
-        self.conn = psycopg2.connect(
-            user=config.DATABASE_USER,
-            password=config.DATABASE_PASSWORD,
-            host=config.DATABASE_HOST,
-            database=config.DATABASE_NAME
-        )
+        self.conn = _open_database_connection_with_retry()
         self.conn.autocommit = True
 
     def __del__(self):
@@ -101,12 +123,7 @@ class ServerStorage(object):
 
     @staticmethod
     def initialize_database():
-        with psycopg2.connect(
-            user=config.DATABASE_USER,
-            password=config.DATABASE_PASSWORD,
-            host=config.DATABASE_HOST,
-            database=config.DATABASE_NAME
-        ) as conn:
+        with _open_database_connection_with_retry() as conn:
             cur = conn.cursor()
             cur.execute(_INITIALIZE_DATABASE_SQL)
             conn.commit()

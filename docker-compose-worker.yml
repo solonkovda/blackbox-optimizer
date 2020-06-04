@@ -9,3 +9,4 @@ services:
     environment:
       DATA_FOLDER: /worker/data_folder
       SERVER_ADDRESS: ${SERVER_ADDRESS:?no server address specified}
+      PYTHONUNBUFFERED: 1
