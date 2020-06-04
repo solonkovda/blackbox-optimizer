@@ -6,9 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile.worker
     image: solonkovda/blackbox_optimization_worker:master
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       DATA_FOLDER: /worker/data_folder
-      SERVER_ADDRESS: ${SERVER_ADDRESS:?no server address specified}
+      SERVER_ADDRESS: ${SERVER_ADDRESS:?SERVER_ADDRESS not specified}
       PYTHONUNBUFFERED: 1
       HEARTBEAT_TIME:
       RESPONSE_DELAY:

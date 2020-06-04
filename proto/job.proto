@@ -9,10 +9,16 @@ enum Algorithm {
     OPENTUNER = 3;
 }
 
+enum EvaluationType {
+    BINARY = 0;
+    DOCKER_EXPORT = 1;
+}
+
 message EvaluationJob {
   string evaluation_job_id = 1;
   repeated BlackboxVariable variables = 2;
   repeated BlackboxVariableMetadata variables_metadata = 3;
+  EvaluationType evaluation_type = 4;
 }
 
 message OptimizationJob {
@@ -32,6 +38,7 @@ message OptimizationJob {
   Algorithm algorithm = 2;
   JobParameters job_parameters = 3;
   repeated JobConstraint job_constraints = 4;
+  EvaluationType evaluation_type = 5;
 }
 
 message Job {

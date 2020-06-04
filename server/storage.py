@@ -166,7 +166,10 @@ class ServerStorage(object):
     def get_job_file_data(self, job_id):
         job_path = os.path.join(config.DATA_FOLDER, job_id)
         with open(job_path, 'rb') as f:
-            yield f.read(4096*1024)
+            data = f.read(1024*1024)
+            while data:
+                yield data
+                data = f.read(1024*1024)
 
     def get_completed_job(self, job_id):
         cur = self.conn.cursor()

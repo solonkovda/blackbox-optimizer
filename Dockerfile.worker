@@ -1,4 +1,6 @@
 FROM python:3.7-buster
+RUN curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+RUN sh /tmp/get-docker.sh
 WORKDIR /worker
 RUN wget -O /usr/local/bin/bazel "https://github.com/bazelbuild/bazel/releases/download/3.2.0/bazel-3.2.0-linux-x86_64"\
 && chmod +x /usr/local/bin/bazel

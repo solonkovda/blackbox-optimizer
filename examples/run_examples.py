@@ -6,6 +6,10 @@ import proto.job_pb2 as job_pb2
 import argparse
 import enum
 import time
+import tempfile
+import os
+import shutil
+import subprocess
 import grpc
 
 _ALGORITHM_CHOICES = [
@@ -20,7 +24,8 @@ _EXAMPLE_CHOICES = [
     'simple_4_variable_knapsack.py',
     'sin_1d.py',
     'sin_1d_argument.py',
-    'sin_1d_environment.py'
+    'sin_1d_environment.py',
+    'docker-sin-3d'
 ]
 
 
@@ -49,6 +54,9 @@ parser.add_argument('--evaluation-limit',
 parser.add_argument('--run-only',
                     help='Runs only the given example, instead of running all of them',
                     choices=_EXAMPLE_CHOICES)
+parser.add_argument('--run-docker-examples',
+                    help='Run docker examples. Requires docker to be installed',
+                    action='store_true')
 
 
 def _wait_for_task(stub, task_id):
@@ -70,17 +78,21 @@ def request_generator(header, binary_path):
     yield header
     with open(binary_path, 'rb') as f:
         data = f.read(1024*1024)
-        r = blackbox_server_pb2.NewTaskRequest()
-        r.body.chunk = data
-        yield r
+        while data:
+            r = blackbox_server_pb2.NewTaskRequest()
+            r.body.chunk = data
+            data = f.read(1024*1024)
+            yield r
 
 
-def _run_example(stub, path, algorithm, job_parameters, variables, constraints):
+def _run_example(stub, path, algorithm, job_parameters, variables, constraints,
+                 evaluation_type=job_pb2.EvaluationType.BINARY):
     print('Running %s' % path)
     print('Variables: %s' % str(variables))
     header = blackbox_server_pb2.NewTaskRequest()
     header.job.optimization_job.algorithm = algorithm
     header.job.optimization_job.job_parameters.CopyFrom(job_parameters)
+    header.job.optimization_job.evaluation_type = evaluation_type
     for name, (value, input_type) in variables.items():
         var = blackbox_variable_pb2.BlackboxVariableMetadata()
         var.name = name
@@ -132,6 +144,19 @@ def _run_example(stub, path, algorithm, job_parameters, variables, constraints):
             value = var.categorical_value.value
         print('%s = %s' % (name, str(value)))
     print('Example complete\n\n')
+
+
+def prepare_docker_image(image_name, output_path):
+    print('Pulling %s. This can take a while' % image_name)
+    subprocess.run(
+        ['docker', 'pull', image_name],
+        stdout=subprocess.DEVNULL
+    )
+    print('Creating docker image')
+    container_id = subprocess.check_output(['docker', 'create', image_name], encoding='ascii').strip()
+    print('Exporting container to file. This can take a while')
+    subprocess.run(['docker', 'export', '-o', output_path, container_id])
+    print('Export complete')
 
 
 def main():
@@ -281,6 +306,39 @@ def main():
                 )
             ],
         )
+    if args.run_docker_examples:
+        tmp = tempfile.mkdtemp()
+        try:
+            container_file_path = os.path.join(tmp, 'container.data')
+            if not args.run_only or args.run_only == 'docker-sin-3d':
+                prepare_docker_image(
+                    'solonkovda/blackbox_optimizer_docker_example_sin_3d',
+                    container_file_path
+                )
+                _run_example(
+                    stub,
+                    container_file_path,
+                    algorithm,
+                    job_parameters,
+                    {
+                        'x': (
+                            (-7.0, 7.0),
+                            (InputType.DIRECT,)
+                        ),
+                        'y': (
+                            (-7.0, 7.0),
+                            (InputType.ARGUMENT, 'y', True)
+                        ),
+                        'z': (
+                            (-7.0, 7.0),
+                            (InputType.ENV, 'z')
+                        ),
+                    },
+                    [],
+                    job_pb2.EvaluationType.DOCKER_EXPORT,
+                )
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
 
 
 if __name__ == '__main__':

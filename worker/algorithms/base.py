@@ -41,6 +41,7 @@ class AlgorithmBase(object):
         new_job = job_pb2.Job()
         new_job.evaluation_job.evaluation_job_id = job.job_id
         new_job.evaluation_job.variables_metadata.extend(job.optimization_job.task_variables)
+        new_job.evaluation_job.evaluation_type = job.optimization_job.evaluation_type
 
         for var in job.optimization_job.task_variables:
             new_var = blackbox_variable_pb2.BlackboxVariable()
