@@ -25,5 +25,6 @@ services:
       PYTHONUNBUFFERED: 1
       GARBAGE_WAIT_TIME:
       CLIENT_ACTIVE_TIME:
+      LOG_LEVEL:
     depends_on:
       - postgres

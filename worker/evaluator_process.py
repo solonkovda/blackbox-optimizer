@@ -4,6 +4,8 @@ import proto.jobs_handler_pb2_grpc as pb2_grpc
 import worker.config as config
 
 import grpc
+import logging
+import os
 import subprocess
 import shlex
 import sys
@@ -15,7 +17,7 @@ def run_binary(variables_value, variables_metadata, task_binary_path):
     args = [task_binary_path]
     env = {}
     direct_input = ''
-    for var in job.evaluation_job.variables_metadata:
+    for var in variables_metadata:
         if var.HasField('argument_input'):
             arg_name = '-'
             if var.argument_input.long_arg:
@@ -48,10 +50,12 @@ def run_docker(job_id, variables_value, variables_metadata, task_docker_path):
         stderr=subprocess.DEVNULL
     ).returncode
     if return_code:
+        logging.debug('importing docker to %s image', job_id)
         subprocess.check_output(['docker', 'import', task_docker_path, job_id])
+        logging.debug('import completed')
     args = ['docker', 'run', '-i', '--rm']
     direct_input = ''
-    for var in job.evaluation_job.variables_metadata:
+    for var in variables_metadata:
         if var.HasField('environment_input'):
             env_name = var.environment_input.env_name
             args.append('-e')
@@ -61,7 +65,7 @@ def run_docker(job_id, variables_value, variables_metadata, task_docker_path):
             direct_input += str(variables_value[var.name]) + '\n'
 
     args.extend([job_id, _DOCKER_INIT_RUNFILE])
-    for var in job.evaluation_job.variables_metadata:
+    for var in variables_metadata:
         if var.HasField('argument_input'):
             arg_name = '-'
             if var.argument_input.long_arg:
@@ -75,7 +79,9 @@ def run_docker(job_id, variables_value, variables_metadata, task_docker_path):
         stdout=subprocess.PIPE,
         encoding='ascii',
     )
+    logging.debug('Starting the docker with %s', direct_input)
     stdout, stderr = p.communicate(direct_input)
+    logging.debug('Docker finished with %s', stdout)
     return stdout.strip()
 
 
@@ -103,7 +109,21 @@ def run_worker(job, client_id, task_file_path):
     stub.CompleteJob(request)
 
 
+def configure_logging():
+    log_level = logging.INFO
+    if os.environ.get("LOG_LEVEL", "") == "DEBUG":
+        log_level = logging.DEBUG
+    log_config = {
+        'level': log_level,
+        'format': '%(asctime)s\t%(levelname)s\t%(message)s',
+        'datefmt': '%Y-%m-%d %H:%M:%S',
+    }
+
+    logging.basicConfig(**log_config)
+
+
 if __name__ == '__main__':
+    configure_logging()
     data = sys.stdin.buffer.read()
     job = job_pb2.Job()
     job.ParseFromString(data)

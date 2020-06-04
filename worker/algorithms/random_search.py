@@ -1,6 +1,7 @@
 import worker.algorithms.base as base
 import worker.config as config
 
+import logging
 import random
 import math
 import time
@@ -105,6 +106,5 @@ class RandomSearch(base.AlgorithmBase):
                 job_id = self._start_evaluation_job(job, variables)
                 jobs.append((job_id, variables))
             time.sleep(5)
-            print(cur_value)
-            print(cur_variables)
+            logging.debug('Random search current state: %s %s', cur_value, str(cur_variables))
         return cur_value, cur_variables

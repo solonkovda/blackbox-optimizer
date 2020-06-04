@@ -25,7 +25,8 @@ _EXAMPLE_CHOICES = [
     'sin_1d.py',
     'sin_1d_argument.py',
     'sin_1d_environment.py',
-    'docker-sin-3d'
+    'docker-sin-3d',
+    'docker-catboost',
 ]
 
 
@@ -332,6 +333,57 @@ def main():
                         'z': (
                             (-7.0, 7.0),
                             (InputType.ENV, 'z')
+                        ),
+                    },
+                    [],
+                    job_pb2.EvaluationType.DOCKER_EXPORT,
+                )
+            if not args.run_only or args.run_only == 'docker-catboost':
+                prepare_docker_image(
+                    'solonkovda/blackbox_optimizer_docker_example_catboost',
+                    container_file_path
+                )
+                _run_example(
+                    stub,
+                    container_file_path,
+                    algorithm,
+                    job_parameters,
+                    {
+                        'iterations': (
+                            (1, 20),
+                            (InputType.DIRECT,)
+                        ),
+                        'learning_rate': (
+                            (0.001, 1),
+                            (InputType.DIRECT,)
+                        ),
+                        'l2_leaf_reg': (
+                            (1.0, 10.0),
+                            (InputType.DIRECT,)
+                        ),
+                        'bagging_temperature': (
+                            (0.0, 10.0),
+                            (InputType.DIRECT,)
+                        ),
+                        'subsample': (
+                            (0.0, 1.0),
+                            (InputType.DIRECT,)
+                        ),
+                        'random_strength': (
+                            (0.0, 1.0),
+                            (InputType.DIRECT,)
+                        ),
+                        'depth': (
+                            (1, 16),
+                            (InputType.DIRECT,)
+                        ),
+                        'min_data_in_leaf': (
+                            (1, 10),
+                            (InputType.DIRECT,)
+                        ),
+                        'rsm': (
+                            (0.0, 1.0),
+                            (InputType.DIRECT,)
                         ),
                     },
                     [],

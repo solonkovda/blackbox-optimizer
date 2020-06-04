@@ -1,6 +1,8 @@
 import worker.algorithms.base as base
 
+import logging
 import random
+
 _ITERATION_DIFF_THREASHOLD = 1e-4
 
 
@@ -66,8 +68,8 @@ class NelderMead(base.AlgorithmBase):
             current_vertices.sort(key=lambda x: x[0])
             if current_vertices[0][0] < current_best[0]:
                 current_best = current_vertices[0]
-            print('Starting new stage, current best: ', current_best)
-            print('Current vertices: ', current_vertices)
+            logging.debug('Starting new stage, current best: %s', current_best)
+            logging.debug('Current vertices: %s', current_vertices)
             vertices_value = list(map(lambda x: x[0], current_vertices))
             stripped_vertices = list(map(lambda x: x[1], current_vertices))
 
@@ -96,19 +98,19 @@ class NelderMead(base.AlgorithmBase):
             ])
             if reflection[0] < vertices_value[0]:
                 if expanded[0] < reflection[0]:
-                    print('Replacing best by expanded')
+                    logging.debug('Replacing best by expanded')
                     current_vertices[-1] = expanded
                 else:
-                    print('Replacing best by reflection')
+                    logging.debug('Replacing best by reflection')
                     current_vertices[-1] = reflection
             elif reflection[0] < vertices_value[-1]:
-                print('Replacing worst by reflection')
+                logging.debug('Replacing worst by reflection')
                 current_vertices[-1] = reflection
             elif contraction[0] < vertices_value[-1]:
-                print('Replacing worst by contraction')
+                logging.debug('Replacing worst by contraction')
                 current_vertices[-1] = contraction
             else:
-                print('Shrinking everything')
+                logging.debug('Shrinking everything')
                 job_list = []
                 for var in stripped_vertices[1:]:
                     new_var = _calc_shrink(var, stripped_vertices[0])

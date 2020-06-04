@@ -4,6 +4,7 @@ import worker.config as config
 
 import grpc
 import os
+import logging
 import subprocess
 import threading
 import time
@@ -81,6 +82,7 @@ class EvaluationJobProcess(JobProcess):
         if os.path.exists(completed_task_path):
             # Task already downloaded, extracting data
             return file_path
+        logging.debug('Downloading task data')
         request = pb2.GetJobDataRequest()
         request.client_id = client_id
         request.job_id = task_id
@@ -94,6 +96,7 @@ class EvaluationJobProcess(JobProcess):
 
         with open(completed_task_path, 'wb') as f:
             pass
+        logging.debug('Download complete')
         return file_path
 
     def __init__(self, stub, client_id, job):
@@ -177,7 +180,21 @@ def worker_loop(client_id):
     heartbeat_thread.join()
 
 
+def configure_logging():
+    log_level = logging.INFO
+    if os.environ.get("LOG_LEVEL", "") == "DEBUG":
+        log_level = logging.DEBUG
+    log_config = {
+        'level': log_level,
+        'format': '%(asctime)s\t%(levelname)s\t%(message)s',
+        'datefmt': '%Y-%m-%d %H:%M:%S',
+    }
+
+    logging.basicConfig(**log_config)
+
+
 if __name__ == '__main__':
+    configure_logging()
     client_id = str(uuid.uuid4())
-    print('Worker started, id = %s' % client_id)
+    logging.info('Worker started. id = %s', client_id)
     worker_loop(client_id)

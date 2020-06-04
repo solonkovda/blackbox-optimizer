@@ -16,3 +16,4 @@ services:
       RESPONSE_DELAY:
       MAX_WORKERS:
       MAX_JOBS_PER_ACTIVE_WORKER:
+      LOG_LEVEL:

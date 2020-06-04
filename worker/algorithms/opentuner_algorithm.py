@@ -4,6 +4,7 @@ import worker.config as config
 import argparse
 import time
 import math
+import logging
 import opentuner
 from opentuner.api import TuningRunManager
 from opentuner.measurement.interface import DefaultMeasurementInterface
@@ -17,6 +18,7 @@ _THRESHOLD_EPS = 1e-5
 
 class OpentunerAlgorithm(base.AlgorithmBase):
     def solve(self, job):
+        logging.debug('Starting opentuner')
         failed_jobs_threshold = self.jobs_limit * _FAILED_JOBS_COEF
         manipulator = ConfigurationManipulator()
         for var in job.optimization_job.task_variables:
@@ -66,8 +68,7 @@ class OpentunerAlgorithm(base.AlgorithmBase):
             r = api.get_best_result()
             if r is not None:
                 current_value = r.time
-                print(r.time)
-                print(api.get_best_configuration())
+                logging.debug('Opentuner current state: %s %s', r.time, api.get_best_configuration())
             time.sleep(5)
         res = api.get_best_result().time
         vars = api.get_best_configuration()

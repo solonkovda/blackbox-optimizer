@@ -8,6 +8,8 @@ import worker.algorithms.random_search as random_search
 import worker.config as config
 
 import grpc
+import os
+import logging
 import sys
 
 
@@ -45,7 +47,21 @@ def run_worker(job, client_id, active_workers):
     stub.CompleteJob(request)
 
 
+def configure_logging():
+    log_level = logging.INFO
+    if os.environ.get("LOG_LEVEL", "") == "DEBUG":
+        log_level = logging.DEBUG
+    log_config = {
+        'level': log_level,
+        'format': '%(asctime)s\t%(levelname)s\t%(message)s',
+        'datefmt': '%Y-%m-%d %H:%M:%S',
+    }
+
+    logging.basicConfig(**log_config)
+
+
 if __name__ == '__main__':
+    configure_logging()
     data = sys.stdin.buffer.read()
     job = job_pb2.Job()
     job.ParseFromString(data)
