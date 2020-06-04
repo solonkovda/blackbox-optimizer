@@ -23,5 +23,7 @@ services:
       DATABASE_USER: blackbox_user
       DATABASE_PASSWORD: blackbox_password
       PYTHONUNBUFFERED: 1
+      GARBAGE_WAIT_TIME:
+      CLIENT_ACTIVE_TIME:
     depends_on:
       - postgres

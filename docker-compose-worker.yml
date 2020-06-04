@@ -10,3 +10,7 @@ services:
       DATA_FOLDER: /worker/data_folder
       SERVER_ADDRESS: ${SERVER_ADDRESS:?no server address specified}
       PYTHONUNBUFFERED: 1
+      HEARTBEAT_TIME:
+      RESPONSE_DELAY:
+      MAX_WORKERS:
+      MAX_JOBS_PER_ACTIVE_WORKER:
