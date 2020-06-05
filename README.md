@@ -46,8 +46,8 @@ docker-compose -f docker-compose-server.yml logs
 
 Запуск:
 ```bash
-docker-compose -f docker-compose-worker.yml pull
 export SERVER_ADDRESS=<address>
+docker-compose -f docker-compose-worker.yml pull
 docker-compose -f docker-compose-worker.yml up -d
 ```
 Остановка:
@@ -99,9 +99,9 @@ bazel run //worker:worker_client
  вычислительный узел и выполнить
 следующую команду:
 ```bash
-bazel run //examples:run_examples --address <server address>
+bazel run //examples:run_examples -- --server-address <server address>
 ```
 Для дополнительных опций запуска тестирования(ограничения времени работы, алгоритма оптимизации и прочего) смотрите:
 ```bash
-bazel run //examples:run_examples --help
+bazel run //examples:run_examples -- --help
 ```
